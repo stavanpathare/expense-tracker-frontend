@@ -1,0 +1,45 @@
+<!-- frontend/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <body>
+  <div class="container scrollable-container">
+    <!-- All your headings, inputs, expense list, budget list -->
+
+  <script src="script.js"></script>
+</body>
+
+  <div class="container">
+    <h1>Expense Dashboard</h1>
+    
+    <h2>Add Expense</h2>
+    <input type="number" id="amount" placeholder="Amount" />
+    <input type="text" id="category" placeholder="Category" />
+    <input type="date" id="date" />
+    <input type="text" id="description" placeholder="Description" />
+    <button onclick="addExpense()">Add Expense</button>
+
+    <h2>Your Expenses</h2>
+    <div id="expenseList"></div>
+
+    <h2>Set Budget</h2>
+    <input type="text" id="budgetCategory" placeholder="Category" />
+    <input type="number" id="budgetAmount" placeholder="Amount" />
+    <input type="month" id="budgetMonth" />
+    <button onclick="setBudget()">Set Budget</button>
+
+    <h2>Your Budgets</h2>
+    <div id="budgetList"></div>
+
+    <button onclick="logout()">Logout</button>
+  </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
