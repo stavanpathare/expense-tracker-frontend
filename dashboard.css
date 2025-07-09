@@ -1,0 +1,96 @@
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(to bottom right , #4D3F29, #C49A6C, #FFF3D1);
+  color: #fff;
+}
+
+h1 {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 20px;
+}
+
+.card {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 20px 0;
+  backdrop-filter: blur(12px);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+button {
+  background: #ffffff20;
+  color: #fff;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  width: 100%;
+  transition: background 0.3s, transform 0.2s;
+}
+
+button:hover {
+  background: #ffffff40;
+  transform: scale(1.05);
+}
+
+input {
+  padding: 12px;
+  margin: 8px 0;
+  width: 100%;
+  max-width: 100%;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  box-sizing: border-box;
+}
+
+#expenseList div, #budgetList div {
+  margin-top: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px;
+  border-radius: 8px;
+  animation: fadeSlide 0.5s forwards;
+  opacity: 0;
+}
+
+.logout-btn {
+  margin-top: 20px;
+  width: 100%;
+}
+
+@keyframes fadeSlide {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 💙 Responsive fix */
+@media (max-width: 600px) {
+  .container {
+    padding: 10px;
+  }
+
+  .card {
+    padding: 15px;
+  }
+
+  input, button {
+    font-size: 14px;
+  }
+}

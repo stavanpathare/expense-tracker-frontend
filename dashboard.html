@@ -1,45 +1,48 @@
-<!-- frontend/dashboard.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <title>Spend Ease | Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css" />
+  <link rel="icon" type="img/png" href="Icon/dashboard.png">
 </head>
 <body>
-    <body>
-  <div class="container scrollable-container">
-    <!-- All your headings, inputs, expense list, budget list -->
-
-  <script src="script.js"></script>
-</body>
-
+  <h1>Welcome back 👋</h1>
   <div class="container">
-    <h1>Expense Dashboard</h1>
+    <div class="card">
+      <h2>Add Expense</h2>
+      <input type="number" id="amount" placeholder="Amount ₹" />
+      <input type="text" id="category" placeholder="Category" />
+      <input type="date" id="date" />
+      <input type="text" id="description" placeholder="Description" />
+      <button onclick="addExpense()">Add Expense</button>
+      </div>
     
-    <h2>Add Expense</h2>
-    <input type="number" id="amount" placeholder="Amount" />
-    <input type="text" id="category" placeholder="Category" />
-    <input type="date" id="date" />
-    <input type="text" id="description" placeholder="Description" />
-    <button onclick="addExpense()">Add Expense</button>
 
-    <h2>Your Expenses</h2>
-    <div id="expenseList"></div>
+    <div class="card">
+      <h2>Expenses</h2>
+      <div id="expenseList"></div>
+    </div>
 
-    <h2>Set Budget</h2>
-    <input type="text" id="budgetCategory" placeholder="Category" />
-    <input type="number" id="budgetAmount" placeholder="Amount" />
-    <input type="month" id="budgetMonth" />
-    <button onclick="setBudget()">Set Budget</button>
+    <div class="card">
+      <h2>Set Budget</h2>
+      <input type="text" id="budgetCategory" placeholder="Category" />
+      <input type="number" id="budgetAmount" placeholder="Amount ₹" />
+      <input type="month" id="budgetMonth" />
+      <button onclick="setBudget()">Set Budget</button>
+    </div>
 
-    <h2>Your Budgets</h2>
-    <div id="budgetList"></div>
+    <div class="card">
+      <h2>Budgets</h2>
+      <div id="budgetList"></div>
+    
+    </div>
 
-    <button onclick="logout()">Logout</button>
+    <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
-  </div>
+
   <script src="script.js"></script>
 </body>
 </html>

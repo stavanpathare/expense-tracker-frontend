@@ -1,4 +1,4 @@
-const backendURL = "http://localhost:5000";
+const backendURL = "https://expense-tracker-backend-vw56.onrender.com";
 
 // ========== AUTH CHECK ==========
 document.addEventListener("DOMContentLoaded", () => {
@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!localStorage.getItem("token")) {
       window.location.href = "index.html";
     } else {
+
       getExpenses();
       getBudgets();
     }
@@ -29,14 +30,16 @@ function clearInputs(ids) {
 }
 
 // ========== FORM TOGGLE ==========
-const signUpButton = document.getElementById("signUp");
-const signInButton = document.getElementById("signIn");
-const container = document.getElementById("container");
+const container = document.querySelector('.container');
+const registerBtn = document.querySelector('.register-btn');
+const loginBtn = document.querySelector('.login-btn');
 
-if (signUpButton && signInButton && container) {
-  signUpButton.addEventListener("click", () => container.classList.add("right-panel-active"));
-  signInButton.addEventListener("click", () => container.classList.remove("right-panel-active"));
-}
+registerBtn.addEventListener('click', () => {
+  container.classList.add('active');
+});
+loginBtn.addEventListener('click', () => {
+  container.classList.remove('active');
+});
 
 
 // ========== AUTH ==========
@@ -262,4 +265,5 @@ async function getBudgets() {
 function logout() {
   localStorage.clear();
   window.location.href = "index.html";
-}
+}  
+
