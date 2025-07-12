@@ -1,46 +1,39 @@
 const backendURL = "https://expense-tracker-backend-vw56.onrender.com";
 
-// ========== AUTH CHECK ==========
+// ========== INIT & AUTH ==========
 document.addEventListener("DOMContentLoaded", () => {
-  if (window.location.pathname.includes("dashboard.html")) {
+  const page = window.location.pathname;
+
+  if (page.includes("dashboard.html")) {
     if (!localStorage.getItem("token")) {
       window.location.href = "index.html";
     } else {
-
       getExpenses();
       getBudgets();
     }
+  }
+
+  const container = document.getElementById("container");
+  const signUpBtn = document.getElementById("signUp");
+  const signInBtn = document.getElementById("signIn");
+
+  if (signUpBtn && signInBtn && container) {
+    signUpBtn.addEventListener("click", () => container.classList.add("active"));
+    signInBtn.addEventListener("click", () => container.classList.remove("active"));
   }
 });
 
 // ========== UTILITY ==========
 function showMessage(text, isError = false) {
-  const msg = document.getElementById("message");
-  msg.style.display = "block";
-  msg.textContent = text;
-  msg.style.background = isError ? "#f8d7da" : "#d4edda";
-  msg.style.color = isError ? "#721c24" : "#155724";
-  setTimeout(() => {
-    msg.style.display = "none";
-  }, 3000);
+  alert(text);
 }
 
 function clearInputs(ids) {
-  ids.forEach(id => document.getElementById(id).value = "");
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";
+  });
 }
-
-// ========== FORM TOGGLE ==========
-const container = document.querySelector('.container');
-const registerBtn = document.querySelector('.register-btn');
-const loginBtn = document.querySelector('.login-btn');
-
-registerBtn.addEventListener('click', () => {
-  container.classList.add('active');
-});
-loginBtn.addEventListener('click', () => {
-  container.classList.remove('active');
-});
-
 
 // ========== AUTH ==========
 async function login() {
@@ -57,10 +50,11 @@ async function login() {
     const data = await res.json();
     if (res.ok) {
       localStorage.setItem("token", data.token);
-      localStorage.setItem("userId", data.user.id);
+      localStorage.setItem("userId", data.user.id || data.user._id);
+      localStorage.setItem("userName", data.user.name);
       window.location.href = "dashboard.html";
     } else {
-      showMessage(data.message, true);
+      showMessage(data.message || "Login failed", true);
     }
   } catch {
     showMessage("Login failed", true);
@@ -81,10 +75,10 @@ async function signup() {
 
     const data = await res.json();
     if (res.ok) {
-      showMessage("Signup successful! Please log in.");
+      showMessage("Signup successful! Please sign in.");
       clearInputs(["name", "signupEmail", "signupPassword"]);
     } else {
-      showMessage(data.message, true);
+      showMessage(data.message || "Signup failed", true);
     }
   } catch {
     showMessage("Signup failed", true);
@@ -93,18 +87,12 @@ async function signup() {
 
 // ========== EXPENSES ==========
 async function addExpense() {
-  const userId = localStorage.getItem("userId");
   const expense = {
-    userId,
+    userId: localStorage.getItem("userId"),
     amount: document.getElementById("amount").value,
     category: document.getElementById("category").value,
     date: document.getElementById("date").value,
     description: document.getElementById("description").value,
-    isRecurring: false,
-    recurrence: "",
-    splitWith: [],
-    paidBy: "self",
-    settled: false,
   };
 
   try {
@@ -114,12 +102,12 @@ async function addExpense() {
       body: JSON.stringify(expense),
     });
 
+    const data = await res.json();
     if (res.ok) {
       showMessage("Expense added successfully");
       clearInputs(["amount", "category", "date", "description"]);
       getExpenses();
     } else {
-      const data = await res.json();
       showMessage(data.message || "Error adding expense", true);
     }
   } catch {
@@ -129,62 +117,24 @@ async function addExpense() {
 
 async function getExpenses() {
   const userId = localStorage.getItem("userId");
+  const list = document.getElementById("expenseList");
+  if (!list) return;
 
   try {
     const res = await fetch(`${backendURL}/api/expenses/${userId}`);
     const expenses = await res.json();
-    const list = document.getElementById("expenseList");
     list.innerHTML = "";
 
     expenses.forEach(exp => {
       const item = document.createElement("div");
-      item.setAttribute("id", `expense-${exp._id}`);
       item.innerHTML = `
         ${exp.date} - ${exp.category}: ₹${exp.amount} (${exp.description})
-        <button onclick="showEditExpense('${exp._id}', '${exp.amount}', '${exp.category}', '${exp.date}', '${exp.description}')">Edit</button>
         <button onclick="deleteExpense('${exp._id}')">Delete</button>
       `;
       list.appendChild(item);
     });
   } catch {
     showMessage("Error fetching expenses", true);
-  }
-}
-
-function showEditExpense(id, amount, category, date, description) {
-  const item = document.getElementById(`expense-${id}`);
-  item.innerHTML = `
-    <input type="number" id="edit-amount-${id}" value="${amount}" />
-    <input type="text" id="edit-category-${id}" value="${category}" />
-    <input type="date" id="edit-date-${id}" value="${date}" />
-    <input type="text" id="edit-description-${id}" value="${description}" />
-    <button onclick="saveEditExpense('${id}')">Save</button>
-    <button onclick="getExpenses()">Cancel</button>
-  `;
-}
-
-async function saveEditExpense(id) {
-  const amount = document.getElementById(`edit-amount-${id}`).value;
-  const category = document.getElementById(`edit-category-${id}`).value;
-  const date = document.getElementById(`edit-date-${id}`).value;
-  const description = document.getElementById(`edit-description-${id}`).value;
-
-  try {
-    const res = await fetch(`${backendURL}/api/expenses/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount, category, date, description }),
-    });
-
-    if (res.ok) {
-      showMessage("Expense updated successfully");
-      getExpenses();
-    } else {
-      const data = await res.json();
-      showMessage(data.message || "Error updating expense", true);
-    }
-  } catch {
-    showMessage("Error updating expense", true);
   }
 }
 
@@ -195,11 +145,11 @@ async function deleteExpense(id) {
         method: "DELETE",
       });
 
+      const data = await res.json();
       if (res.ok) {
         showMessage("Expense deleted");
         getExpenses();
       } else {
-        const data = await res.json();
         showMessage(data.message || "Error deleting expense", true);
       }
     } catch {
@@ -210,9 +160,8 @@ async function deleteExpense(id) {
 
 // ========== BUDGET ==========
 async function setBudget() {
-  const userId = localStorage.getItem("userId");
   const budget = {
-    userId,
+    userId: localStorage.getItem("userId"),
     category: document.getElementById("budgetCategory").value,
     amount: document.getElementById("budgetAmount").value,
     month: document.getElementById("budgetMonth").value,
@@ -225,12 +174,12 @@ async function setBudget() {
       body: JSON.stringify(budget),
     });
 
+    const data = await res.json();
     if (res.ok) {
       showMessage("Budget set successfully");
       clearInputs(["budgetCategory", "budgetAmount", "budgetMonth"]);
       getBudgets();
     } else {
-      const data = await res.json();
       showMessage(data.message || "Error setting budget", true);
     }
   } catch {
@@ -240,20 +189,20 @@ async function setBudget() {
 
 async function getBudgets() {
   const userId = localStorage.getItem("userId");
+  const list = document.getElementById("budgetList");
+  if (!list) return;
 
   try {
     const res = await fetch(`${backendURL}/api/budgets/${userId}`);
     const budgets = await res.json();
-    const list = document.getElementById("budgetList");
     list.innerHTML = "";
 
     budgets.forEach(budget => {
       const item = document.createElement("div");
-      item.textContent = `${budget.month} - ${budget.category}: ₹${budget.amount}`;
-
-      if (budget.amount > 10000) {
-        item.style.background = "#ffe0e0";
-      }
+      item.innerHTML = `
+        ${budget.month} - ${budget.category}: ₹${budget.amount}
+        <button onclick="deleteBudget('${budget._id}')">Delete</button>
+      `;
       list.appendChild(item);
     });
   } catch {
@@ -261,9 +210,28 @@ async function getBudgets() {
   }
 }
 
+async function deleteBudget(id) {
+  if (confirm("Are you sure you want to delete this budget?")) {
+    try {
+      const res = await fetch(`${backendURL}/api/budgets/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        showMessage("Budget deleted");
+        getBudgets();
+      } else {
+        showMessage(data.message || "Error deleting budget", true);
+      }
+    } catch {
+      showMessage("Error deleting budget", true);
+    }
+  }
+}
+
 // ========== LOGOUT ==========
 function logout() {
   localStorage.clear();
   window.location.href = "index.html";
-}  
-
+}

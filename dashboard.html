@@ -1,16 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Spend Ease | Home</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="dashboard.css" />
-  <link rel="icon" type="img/png" href="Icon/dashboard.png">
+  <link rel="stylesheet" href="Assets/CSS/dashboard.css" />
+  <link rel="icon" type="image/png" href="assets/icon/dashboard.png">
 </head>
+
 <body>
   <h1>Welcome back 👋</h1>
   <div class="container">
+
     <div class="card">
       <h2>Add Expense</h2>
       <input type="number" id="amount" placeholder="Amount ₹" />
@@ -18,8 +21,7 @@
       <input type="date" id="date" />
       <input type="text" id="description" placeholder="Description" />
       <button onclick="addExpense()">Add Expense</button>
-      </div>
-    
+    </div>
 
     <div class="card">
       <h2>Expenses</h2>
@@ -37,10 +39,9 @@
     <div class="card">
       <h2>Budgets</h2>
       <div id="budgetList"></div>
-    
     </div>
 
-    <button class="logout-btn" onclick="logout()">Logout</button>
+    <button onclick="logout()">Logout</button>
   </div>
 
   <script src="script.js"></script>
