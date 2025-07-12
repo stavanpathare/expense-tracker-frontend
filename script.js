@@ -129,12 +129,52 @@ async function getExpenses() {
       const item = document.createElement("div");
       item.innerHTML = `
         ${exp.date} - ${exp.category}: ₹${exp.amount} (${exp.description})
+        <button onclick="editExpense('${exp._id}', '${exp.amount}', '${exp.category}', '${exp.date}', '${exp.description}')">Edit</button>
         <button onclick="deleteExpense('${exp._id}')">Delete</button>
       `;
       list.appendChild(item);
     });
   } catch {
     showMessage("Error fetching expenses", true);
+  }
+}
+
+function editExpense(id, amount, category, date, description) {
+  const list = document.getElementById("expenseList");
+  list.innerHTML = `
+    <input type="number" id="edit-amount" value="${amount}" />
+    <input type="text" id="edit-category" value="${category}" />
+    <input type="date" id="edit-date" value="${date}" />
+    <input type="text" id="edit-description" value="${description}" />
+    <button onclick="saveExpense('${id}')">Save</button>
+    <button onclick="getExpenses()">Cancel</button>
+  `;
+}
+
+async function saveExpense(id) {
+  const expense = {
+    amount: document.getElementById("edit-amount").value,
+    category: document.getElementById("edit-category").value,
+    date: document.getElementById("edit-date").value,
+    description: document.getElementById("edit-description").value,
+  };
+
+  try {
+    const res = await fetch(`${backendURL}/api/expenses/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(expense),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      showMessage("Expense updated successfully");
+      getExpenses();
+    } else {
+      showMessage(data.message || "Error updating expense", true);
+    }
+  } catch {
+    showMessage("Error updating expense", true);
   }
 }
 
