@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       getExpenses();
       getBudgets();
+      getRemainingByCategory();
+      getRemainingBudget();
     }
   }
 
@@ -267,6 +269,80 @@ async function deleteBudget(id) {
     } catch {
       showMessage("Error deleting budget", true);
     }
+  }
+}
+// / ========== REMAINING TOTAL BUDGET ==========
+async function getRemainingBudget() {
+  const userId = localStorage.getItem("userId");
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const display = document.getElementById("remainingBudget");
+  if (!display) return;
+
+  try {
+    const [budgetRes, expenseRes] = await Promise.all([
+      fetch(`${backendURL}/api/budgets/${userId}`),
+      fetch(`${backendURL}/api/expenses/${userId}`)
+    ]);
+
+    const budgets = await budgetRes.json();
+    const expenses = await expenseRes.json();
+
+    const thisMonthBudgets = budgets.filter(b => b.month === currentMonth);
+    const totalBudget = thisMonthBudgets.reduce((sum, b) => sum + parseFloat(b.amount), 0);
+
+    const thisMonthExpenses = expenses.filter(e => e.date.startsWith(currentMonth));
+    const totalExpenses = thisMonthExpenses.reduce((sum, e) => sum + parseFloat(e.amount), 0);
+
+    const remaining = totalBudget - totalExpenses;
+    display.textContent = `₹${remaining.toFixed(2)}`;
+  } catch (err) {
+    console.error("Error fetching remaining budget:", err);
+  }
+}
+
+// ========== REMAINING BUDGET BY CATEGORY ========== 
+async function getRemainingByCategory() {
+  const userId = localStorage.getItem("userId");
+  const currentMonth = new Date().toISOString().slice(0, 7);
+  const display = document.getElementById("remainingByCategory");
+  if (!display) return;
+
+  try {
+    const [budgetRes, expenseRes] = await Promise.all([
+      fetch(`${backendURL}/api/budgets/${userId}`),
+      fetch(`${backendURL}/api/expenses/${userId}`)
+    ]);
+
+    const budgets = await budgetRes.json();
+    const expenses = await expenseRes.json();
+
+    const monthlyBudgets = budgets.filter(b => b.month === currentMonth);
+    const categoryMap = {};
+
+    expenses.forEach(exp => {
+      const expMonth = exp.date.slice(0, 7);
+      if (expMonth !== currentMonth) return;
+      if (!categoryMap[exp.category]) categoryMap[exp.category] = 0;
+      categoryMap[exp.category] += parseFloat(exp.amount);
+    });
+
+    display.innerHTML = "";
+
+    monthlyBudgets.forEach(budget => {
+      const spent = categoryMap[budget.category] || 0;
+      const remaining = budget.amount - spent;
+      const usedPercent = (spent / budget.amount) * 100;
+
+      let alertMsg = "";
+      if (usedPercent >= 80) alertMsg = "<span style='color:red'>🔴 Over 80% used!</span>";
+      else if (usedPercent >= 60) alertMsg = "<span style='color:orange'>🟠 60%+ used</span>";
+
+      const div = document.createElement("div");
+      div.innerHTML = `<strong>${budget.category}</strong>: ₹${remaining.toFixed(2)} left ${alertMsg}`;
+      display.appendChild(div);
+    });
+  } catch (err) {
+    console.error("Error in category budget tracker:", err);
   }
 }
 

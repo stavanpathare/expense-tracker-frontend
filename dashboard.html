@@ -12,8 +12,18 @@
 
 <body>
   <h1>Welcome back 👋</h1>
+
+  <div class="navbar">
+    <div class="nav-links">
+      <a href="dashboard.html">Home</a>
+      <a href="graph.html">Graph</a>
+      <a href="profile.html">Profile</a>
+    </div>
+  </div>
+
   <div class="container">
 
+    
     <div class="card">
       <h2>Add Expense</h2>
       <input type="number" id="amount" placeholder="Amount ₹" />
@@ -27,6 +37,10 @@
       <h2>Expenses</h2>
       <div id="expenseList"></div>
     </div>
+<div class="card">
+  <h2>Remaining Budgets</h2>
+  <div id="remainingByCategory"></div>
+</div>
 
     <div class="card">
       <h2>Set Budget</h2>
@@ -45,5 +59,7 @@
   </div>
 
   <script src="script.js"></script>
+
 </body>
+
 </html>
