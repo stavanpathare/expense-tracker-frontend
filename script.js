@@ -14,6 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
       getRemainingBudget();
       fetchSavings();
       setupSavingsListeners();
+      getSavingsHistory();
     }
   }
 
@@ -98,7 +99,9 @@ function setupSavingsListeners() {
 
   if (savingsSlider && savingsValueDisplay && savedAmountInput) {
     savingsSlider.addEventListener("input", () => {
-      savingsValueDisplay.textContent = `₹${savingsSlider.value}`;
+      const val = Math.round(parseInt(savingsSlider.value) / 100) * 100;
+      savingsSlider.value = val;
+      savingsValueDisplay.textContent = `₹${val}`;
       updateSavingsBar();
     });
 
@@ -127,18 +130,6 @@ async function saveSavings() {
 
   if (!month) return showMessage("Please select a month for savings", true);
 
-  // Display previous savings
-  const previousGoal = document.getElementById("savingsGoal").value;
-  const previousSaved = document.getElementById("savedAmount").value;
-
-  const historyDiv = document.getElementById("savingsHistory");
-  if (historyDiv) {
-    historyDiv.innerHTML = `
-      <p>Previous Goal: ₹${previousGoal}</p>
-      <p>Previous Saved: ₹${previousSaved}</p>
-    `;
-  }
-
   try {
     const res = await fetch(`${backendURL}/api/savings`, {
       method: "POST",
@@ -150,6 +141,8 @@ async function saveSavings() {
     if (res.ok) {
       showMessage("Savings updated successfully!");
       updateSavingsBar();
+      fetchSavings(); // Refresh current values
+      getSavingsHistory(); // Refresh history list
     } else {
       showMessage(data.message || "Failed to update savings", true);
     }
@@ -170,12 +163,23 @@ async function fetchSavings() {
       const slider = document.getElementById("savingsGoal");
       const savedInput = document.getElementById("savedAmount");
       const display = document.getElementById("savingsValue");
+      const historyDiv = document.getElementById("savingsHistory");
 
       if (slider) {
         slider.value = data.goal || 0;
         display.textContent = `₹${data.goal || 0}`;
       }
-      if (savedInput) savedInput.value = data.saved || 0;
+
+      if (savedInput) {
+        savedInput.value = data.saved || 0;
+      }
+
+      if (historyDiv) {
+        historyDiv.innerHTML = `
+          <p>Previous Goal: ₹${data.goal || 0}</p>
+          <p>Previous Saved: ₹${data.saved || 0}</p>
+        `;
+      }
 
       updateSavingsBar();
     }
@@ -183,6 +187,36 @@ async function fetchSavings() {
     console.error("Error fetching savings data:", err);
   }
 }
+
+async function getSavingsHistory() {
+  const userId = localStorage.getItem("userId");
+  const list = document.getElementById("savingsHistoryList");
+  if (!list) return;
+
+  try {
+    const res = await fetch(`${backendURL}/api/savings/${userId}`);
+    const data = await res.json();
+    if (!Array.isArray(data)) return;
+
+    // Sort descending by month
+    const sorted = data.sort((a, b) => b.month.localeCompare(a.month));
+    list.innerHTML = "";
+
+    sorted.forEach(entry => {
+      const div = document.createElement("div");
+      const label = new Date(entry.month + "-01").toLocaleString("default", {
+        month: "long", year: "numeric"
+      });
+
+      div.className = "bg-white bg-opacity-10 p-2 rounded mb-2";
+      div.innerHTML = `<strong>${label}</strong>: Goal ₹${entry.goal}, Saved ₹${entry.saved}`;
+      list.appendChild(div);
+    });
+  } catch (err) {
+    console.error("Error fetching savings history:", err);
+  }
+}
+
 // ========== EXPENSES ==========
 async function addExpense() {
   const expense = {
