@@ -164,4 +164,15 @@ input {
   transition: width 0.4s ease-in-out;
 }
 
+/* 
+.chart-container {
+  height: 400px;
+  width: 100%;
+  overflow-x: auto;
+}
 
+@media (max-width: 768px) {
+  .chart-container {
+    height: 300px;
+  }
+} */
