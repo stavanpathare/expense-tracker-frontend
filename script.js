@@ -238,7 +238,9 @@ async function addExpense() {
     if (res.ok) {
       showMessage("Expense added successfully");
       clearInputs(["amount", "category", "date", "description"]);
-      getExpenses();
+      getExpenses();                // ✅ Refresh expense list
+      getRemainingBudget();         // ✅ Refresh remaining total
+      getRemainingByCategory();     // ✅ Refresh category-wise
     } else {
       showMessage(data.message || "Error adding expense", true);
     }
@@ -246,6 +248,7 @@ async function addExpense() {
     showMessage("Error adding expense", true);
   }
 }
+
 
 async function getExpenses() {
   const userId = localStorage.getItem("userId");
