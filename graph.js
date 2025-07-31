@@ -2,13 +2,82 @@ const backendURL = "https://expense-tracker-backend-vw56.onrender.com";
 
 // ========== INIT ========== //
 document.addEventListener("DOMContentLoaded", () => {
-  drawBudgetCategoryPieChart();
+  // drawBudgetCategoryPieChart();
   drawSavingsVsBudgetChart();
   drawMonthlyExpensesLineChart();
+  drawExpensesByCategoryBarChart();
+  drawBudgetCategoryDonutChart();
 });
 
 // ========== PIE CHART: Current Month Budget by Category ========== //
-async function drawBudgetCategoryPieChart() {
+// async function drawBudgetCategoryPieChart() {
+//   const userId = localStorage.getItem("userId");
+//   const currentMonth = new Date().toISOString().slice(0, 7);
+
+//   try {
+//     const res = await fetch(`${backendURL}/api/budgets/${userId}`);
+//     const budgets = await res.json();
+
+//     const currentMonthBudgets = budgets.filter(b => b.month === currentMonth);
+//     const labels = currentMonthBudgets.map(b => b.category);
+//     const data = currentMonthBudgets.map(b => parseFloat(b.amount));
+
+//     const softColors = [
+//       '#4E79A7', // Blue – Food
+//   '#F28E2B', // Orange – Travel
+//   '#E15759', // Red – Shopping
+//   '#76B7B2', // Teal – Health
+//   '#59A14F', // Green – Bills
+//   '#EDC948', // Yellow – Entertainment
+//   '#B07AA1', // Purple – Education
+//   '#FF9DA7'  // Pink – Misc
+//     ];
+
+//     const ctx = document.getElementById("budgetPieChart").getContext("2d");
+
+//     new Chart(ctx, {
+//       type: "pie",
+//       data: {
+//         labels,
+//         datasets: [{
+//           label: "Budget by Category",
+//           data,
+//           backgroundColor: softColors.slice(0, labels.length),
+//           borderWidth: 1
+//         }]
+//       },
+//       options: {
+//         responsive: true,
+//         maintainAspectRatio: false,
+//         plugins: {
+//           legend: {
+//             position: "bottom",
+//             labels: {
+//               color: "#fff",
+//               font: {
+//                 size: 14,
+//                 weight: 'bold'
+//               }
+//             }
+//           },
+//           title: {
+//             display: true,
+//             text: "Current Month Budget Allocation",
+//             color: "#fff",
+//             padding: 10
+//           }
+//         }
+//       }
+//     });
+
+//   } catch (err) {
+//     console.error("Pie chart load error:", err);
+//   }
+// }
+
+
+
+async function drawBudgetCategoryDonutChart() {
   const userId = localStorage.getItem("userId");
   const currentMonth = new Date().toISOString().slice(0, 7);
 
@@ -21,14 +90,19 @@ async function drawBudgetCategoryPieChart() {
     const data = currentMonthBudgets.map(b => parseFloat(b.amount));
 
     const softColors = [
-      "#A0C4FF", "#B9FBC0", "#FFD6A5",
-      "#FFC6FF", "#FDFFB6", "#D0F4DE"
+      '#4E79A7', // Blue – Food
+   '#F28E2B', // Orange – Travel
+  '#E15759', // Red – Shopping
+  '#76B7B2', // Teal – Health
+  '#59A14F', // Green – Bills
+   '#EDC948', // Yellow – Entertainment
+   '#B07AA1', // Purple – Education
+   '#FF9DA7'  // Pink – Misc
     ];
 
     const ctx = document.getElementById("budgetPieChart").getContext("2d");
-
     new Chart(ctx, {
-      type: "pie",
+      type: "doughnut", // 🔁 changed from "pie" to "doughnut"
       data: {
         labels,
         datasets: [{
@@ -41,20 +115,21 @@ async function drawBudgetCategoryPieChart() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        cutout: "60%", // 🍩 thickness of the donut hole
         plugins: {
           legend: {
             position: "bottom",
             labels: {
               color: "#fff",
               font: {
-                size: 14,
+                size: 13,
                 weight: 'bold'
               }
             }
           },
           title: {
             display: true,
-            text: "Current Month Budget Allocation",
+            text: "Budget Allocation (Donut)",
             color: "#fff",
             padding: 10
           }
@@ -63,9 +138,11 @@ async function drawBudgetCategoryPieChart() {
     });
 
   } catch (err) {
-    console.error("Pie chart load error:", err);
+    console.error("Donut chart load error:", err);
   }
 }
+
+
 
 // ========== BAR CHART: Monthly Savings vs Budget ========== //
 async function drawSavingsVsBudgetChart() {
@@ -226,4 +303,84 @@ async function drawMonthlyExpensesLineChart() {
   } catch (err) {
     console.error("Line chart error:", err);
   }
+}
+
+
+// Expenses Pie CHart
+async function drawExpensesByCategoryBarChart() {
+  const userId = localStorage.getItem("userId");
+  const currentMonth = new Date().toISOString().slice(0, 7);
+
+  try {
+    const res = await fetch(`${backendURL}/api/expenses/${userId}`);
+    const expenses = await res.json();
+
+    const monthlyExpenses = expenses.filter(exp => exp.date.startsWith(currentMonth));
+
+    // Group by category
+    const categoryTotals = {};
+    monthlyExpenses.forEach(exp => {
+      const cat = exp.category || "Other";
+      categoryTotals[cat] = (categoryTotals[cat] || 0) + parseFloat(exp.amount);
+    });
+
+    const labels = Object.keys(categoryTotals);
+    const data = Object.values(categoryTotals);
+
+    const ctx = document.getElementById("expensesByCategoryChart").getContext("2d");
+
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [{
+          label: "₹ Spent",
+          data,
+          backgroundColor: "#FFA500",
+          borderRadius: 5,
+        }]
+      },
+      options: {
+        indexAxis: 'y', // Horizontal bar
+        responsive: true,
+        plugins: {
+          legend: {
+            display: false
+          },
+          title: {
+            display: false
+          }
+        },
+        scales: {
+          x: {
+            ticks: {
+              color: "#fff"
+            },
+            grid: {
+              color: "rgba(255, 255, 255, 0.1)"
+            }
+          },
+          y: {
+            ticks: {
+              color: "#fff"
+            },
+            grid: {
+              display: false
+            }
+          }
+        }
+      }
+    });
+
+  } catch (err) {
+    console.error("Expenses by Category Chart Error:", err);
+  }
+}
+
+
+
+// ========== LOGOUT ==========
+function logout() {
+  localStorage.clear();
+  window.location.href = "index.html";
 }
