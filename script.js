@@ -1,20 +1,14 @@
 const backendURL = "https://expense-tracker-backend-vw56.onrender.com";
 
 // ========== INIT ==========
-document.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("pageshow", () => {
   const page = window.location.pathname;
 
   if (page.includes("dashboard.html")) {
     if (!localStorage.getItem("token")) {
       window.location.href = "index.html";
     } else {
-      getExpenses();
-      getBudgets();
-      getRemainingByCategory();
-      getRemainingBudget();
-      fetchSavings();
-      setupSavingsListeners();
-      getSavingsHistory();
+      loadDashboard(); // Always load dashboard data
     }
   }
 
@@ -27,6 +21,17 @@ document.addEventListener("DOMContentLoaded", () => {
     signInBtn.addEventListener("click", () => container.classList.remove("active"));
   }
 });
+
+// ========== DASHBOARD LOADER ==========
+function loadDashboard() {
+  getExpenses();
+  getBudgets();
+  getRemainingByCategory();
+  getRemainingBudget();
+  fetchSavings();
+  setupSavingsListeners();
+  getSavingsHistory();
+}
 
 // ========== UTILITY ==========
 function showMessage(text, isError = false) {
@@ -49,7 +54,7 @@ async function login() {
     const res = await fetch(`${backendURL}/api/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
+      body: JSON.stringify({ email, password }),
     });
 
     const data = await res.json();
@@ -76,7 +81,7 @@ async function signup() {
     const res = await fetch(`${backendURL}/api/auth/signup`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password })
+      body: JSON.stringify({ name, email, password }),
     });
 
     const data = await res.json();
@@ -89,6 +94,12 @@ async function signup() {
   } catch {
     showMessage("Signup failed", true);
   }
+}
+
+// ========== LOGOUT ==========
+function logout() {
+  localStorage.clear();
+  window.location.href = "index.html";
 }
 
 // ========== SAVINGS ==========
@@ -134,15 +145,15 @@ async function saveSavings() {
     const res = await fetch(`${backendURL}/api/savings`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId, goal, saved, month })
+      body: JSON.stringify({ userId, goal, saved, month }),
     });
 
     const data = await res.json();
     if (res.ok) {
       showMessage("Savings updated successfully!");
       updateSavingsBar();
-      fetchSavings(); // Refresh current values
-      getSavingsHistory(); // Refresh history list
+      fetchSavings();
+      getSavingsHistory();
     } else {
       showMessage(data.message || "Failed to update savings", true);
     }
@@ -169,11 +180,7 @@ async function fetchSavings() {
         slider.value = data.goal || 0;
         display.textContent = `₹${data.goal || 0}`;
       }
-
-      if (savedInput) {
-        savedInput.value = data.saved || 0;
-      }
-
+      if (savedInput) savedInput.value = data.saved || 0;
       if (historyDiv) {
         historyDiv.innerHTML = `
           <p>Previous Goal: ₹${data.goal || 0}</p>
@@ -198,16 +205,15 @@ async function getSavingsHistory() {
     const data = await res.json();
     if (!Array.isArray(data)) return;
 
-    // Sort descending by month
     const sorted = data.sort((a, b) => b.month.localeCompare(a.month));
     list.innerHTML = "";
 
-    sorted.forEach(entry => {
+    sorted.forEach((entry) => {
       const div = document.createElement("div");
       const label = new Date(entry.month + "-01").toLocaleString("default", {
-        month: "long", year: "numeric"
+        month: "long",
+        year: "numeric",
       });
-
       div.className = "bg-white bg-opacity-10 p-2 rounded mb-2";
       div.innerHTML = `<strong>${label}</strong>: Goal ₹${entry.goal}, Saved ₹${entry.saved}`;
       list.appendChild(div);
@@ -238,9 +244,9 @@ async function addExpense() {
     if (res.ok) {
       showMessage("Expense added successfully");
       clearInputs(["amount", "category", "date", "description"]);
-      getExpenses();                // ✅ Refresh expense list
-      getRemainingBudget();         // ✅ Refresh remaining total
-      getRemainingByCategory();     // ✅ Refresh category-wise
+      getExpenses();
+      getRemainingBudget();
+      getRemainingByCategory();
     } else {
       showMessage(data.message || "Error adding expense", true);
     }
@@ -248,7 +254,6 @@ async function addExpense() {
     showMessage("Error adding expense", true);
   }
 }
-
 
 async function getExpenses() {
   const userId = localStorage.getItem("userId");
@@ -260,22 +265,25 @@ async function getExpenses() {
     const expenses = await res.json();
 
     const grouped = {};
-    expenses.forEach(exp => {
-      const monthKey = exp.date.slice(0, 7); // 'YYYY-MM'
+    expenses.forEach((exp) => {
+      const monthKey = exp.date.slice(0, 7);
       if (!grouped[monthKey]) grouped[monthKey] = [];
       grouped[monthKey].push(exp);
     });
 
     container.innerHTML = "";
     const sortedMonths = Object.keys(grouped).sort().reverse();
-    sortedMonths.forEach(month => {
+    sortedMonths.forEach((month) => {
       const details = document.createElement("details");
       const summary = document.createElement("summary");
-      const monthName = new Date(month + "-01").toLocaleString("default", { month: "long", year: "numeric" });
+      const monthName = new Date(month + "-01").toLocaleString("default", {
+        month: "long",
+        year: "numeric",
+      });
       summary.textContent = monthName;
       details.appendChild(summary);
 
-      grouped[month].forEach(exp => {
+      grouped[month].forEach((exp) => {
         const item = document.createElement("div");
         item.innerHTML = `
           ${exp.date} - ${exp.category}: ₹${exp.amount} (${exp.description})
@@ -350,6 +358,7 @@ async function deleteExpense(id) {
     }
   }
 }
+
 // ========== BUDGET ==========
 async function setBudget() {
   const budget = {
@@ -389,7 +398,7 @@ async function getBudgets() {
     const budgets = await res.json();
     list.innerHTML = "";
 
-    budgets.forEach(budget => {
+    budgets.forEach((budget) => {
       const item = document.createElement("div");
       item.innerHTML = `
         ${budget.month} - ${budget.category}: ₹${budget.amount}
@@ -421,7 +430,8 @@ async function deleteBudget(id) {
     }
   }
 }
-// / ========== REMAINING TOTAL BUDGET ==========
+
+// ========== REMAINING ==========
 async function getRemainingBudget() {
   const userId = localStorage.getItem("userId");
   const currentMonth = new Date().toISOString().slice(0, 7);
@@ -450,7 +460,6 @@ async function getRemainingBudget() {
   }
 }
 
-// ========== REMAINING BUDGET BY CATEGORY ========== 
 async function getRemainingByCategory() {
   const userId = localStorage.getItem("userId");
   const currentMonth = new Date().toISOString().slice(0, 7);
@@ -494,10 +503,4 @@ async function getRemainingByCategory() {
   } catch (err) {
     console.error("Error in category budget tracker:", err);
   }
-}
-
-// ========== LOGOUT ==========
-function logout() {
-  localStorage.clear();
-  window.location.href = "index.html";
 }

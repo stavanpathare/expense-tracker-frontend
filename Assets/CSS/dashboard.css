@@ -3,11 +3,17 @@ body {
   padding: 0;
   font-family: "Poppins", sans-serif;
   /* background: linear-gradient(to bottom right, #B6CEFA, #73B1E8, #4A94DA, #3372C4, #1750AC, #003366); */
-   background: linear-gradient(to bottom, #5c7fae, #406c9e, #2c5990, #1f4073, #10294d, #001933);
+  background: linear-gradient(
+    to bottom,
+    #5c7fae,
+    #406c9e,
+    #2c5990,
+    #1f4073,
+    #10294d,
+    #001933
+  );
   color: #fff;
 }
-
-
 
 h1 {
   text-align: center;
@@ -29,7 +35,6 @@ h1 {
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   transition: transform 0.3s ease;
 }
-
 
 .card:hover {
   transform: translateY(-5px);
@@ -62,7 +67,6 @@ input {
   outline: none;
   box-sizing: border-box;
 }
-
 
 #expenseList div,
 #budgetList div {
@@ -115,12 +119,12 @@ input {
   color: #fff;
   margin-left: 25px;
   font-weight: 600;
-  font-family: 'Poppins', sans-serif;
+  font-family: "Poppins", sans-serif;
   transition: color 0.3s;
 }
 
 .nav-links a:hover {
-  color: #B6CEFA;
+  color: #b6cefa;
   text-decoration: dotted;
 }
 
