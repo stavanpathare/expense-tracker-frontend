@@ -398,14 +398,18 @@ async function getBudgets() {
     const budgets = await res.json();
     list.innerHTML = "";
 
-    budgets.forEach((budget) => {
-      const item = document.createElement("div");
-      item.innerHTML = `
-        ${budget.month} - ${budget.category}: ₹${budget.amount}
-        <button onclick="deleteBudget('${budget._id}')">Delete</button>
-      `;
-      list.appendChild(item);
-    });
+    // Sort by month descending (latest first)
+budgets.sort((a, b) => b.month.localeCompare(a.month));
+
+budgets.forEach((budget) => {
+  const item = document.createElement("div");
+  item.innerHTML = `
+    ${budget.month} - ${budget.category}: ₹${budget.amount}
+    <button onclick="deleteBudget('${budget._id}')">Delete</button>
+  `;
+  list.appendChild(item);
+});
+
   } catch {
     showMessage("Error fetching budgets", true);
   }
