@@ -98,3 +98,8 @@ button:hover {
 #chk:checked ~ .signup label {
   transform: scale(0.6);
 }
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

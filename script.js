@@ -45,6 +45,8 @@ function clearInputs(ids) {
   });
 }
 
+
+
 // ========== AUTH ==========
 async function login() {
   const email = document.getElementById("email").value;
