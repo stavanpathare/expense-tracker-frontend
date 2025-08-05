@@ -51,6 +51,12 @@ function clearInputs(ids) {
 async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
+  const btn = document.getElementById("signIn");
+
+  btn.disabled = true;
+  btn.textContent = "Logging in...";
+  btn.style.opacity = 0.6;
+  btn.style.cursor = "not-allowed";
 
   try {
     const res = await fetch(`${backendURL}/api/auth/login`, {
@@ -68,9 +74,18 @@ async function login() {
       window.location.href = "dashboard.html";
     } else {
       showMessage(data.message || "Login failed", true);
+      resetLoginButton();
     }
   } catch {
     showMessage("Login failed", true);
+    resetLoginButton();
+  }
+
+  function resetLoginButton() {
+    btn.disabled = false;
+    btn.textContent = "Login";
+    btn.style.opacity = 1;
+    btn.style.cursor = "pointer";
   }
 }
 
@@ -78,6 +93,12 @@ async function signup() {
   const name = document.getElementById("name").value;
   const email = document.getElementById("signupEmail").value;
   const password = document.getElementById("signupPassword").value;
+  const btn = document.getElementById("signUp");
+
+  btn.disabled = true;
+  btn.textContent = "Signing up...";
+  btn.style.opacity = 0.6;
+  btn.style.cursor = "not-allowed";
 
   try {
     const res = await fetch(`${backendURL}/api/auth/signup`, {
@@ -96,7 +117,13 @@ async function signup() {
   } catch {
     showMessage("Signup failed", true);
   }
+
+  btn.disabled = false;
+  btn.textContent = "Sign Up";
+  btn.style.opacity = 1;
+  btn.style.cursor = "pointer";
 }
+
 
 // ========== LOGOUT ==========
 function logout() {
@@ -451,10 +478,10 @@ async function deleteBudget(id) {
         method: "DELETE",
       });
 
-      const data = await res.json();
+      const data = await res.json();ā
       if (res.ok) {
         showMessage("Budget deleted");
-        getBudgets();
+        getBudgets();ā
       } else {
         showMessage(data.message || "Error deleting budget", true);
       }
