@@ -216,14 +216,41 @@ async function getSavingsHistory() {
         month: "long",
         year: "numeric",
       });
+
       div.className = "bg-white bg-opacity-10 p-2 rounded mb-2";
-      div.innerHTML = `<strong>${label}</strong>: Goal ₹${entry.goal}, Saved ₹${entry.saved}`;
+      div.innerHTML = `
+        <strong>${label}</strong>: Goal ₹${entry.goal}, Saved ₹${entry.saved}
+        <button onclick="deleteSaving('${entry._id}')">Delete</button>
+      `;
+
       list.appendChild(div);
     });
   } catch (err) {
     console.error("Error fetching savings history:", err);
   }
 }
+
+
+async function deleteSaving(id) {
+  if (!confirm("Are you sure you want to delete this saving?")) return;
+
+  try {
+    const res = await fetch(`${backendURL}/api/savings/${id}`, {
+      method: "DELETE"
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      showMessage("Saving deleted successfully");
+      getSavingsHistory();
+    } else {
+      showMessage(data.message || "Error deleting saving", true);
+    }
+  } catch {
+    showMessage("Error deleting saving", true);
+  }
+}
+
 
 // ========== EXPENSES ==========
 async function addExpense() {
