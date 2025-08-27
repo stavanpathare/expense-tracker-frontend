@@ -125,7 +125,7 @@ input {
 
 .nav-links a:hover {
   color: #b6cefa;
-  text-decoration: dotted;
+  text-decoration: underline;
 }
 
 /* Savings Section Styles */

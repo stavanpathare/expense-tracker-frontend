@@ -29,7 +29,7 @@ A modern full-stack expense tracker app to manage daily expenses, set budgets, a
 
 ## 🌐 Live Demo
 
-Frontend: [Spend Ease](https://spendease.netlify.app)  
+Frontend: [Spent Nest](https://spentnest.vercel.app)  
 
 ---
 

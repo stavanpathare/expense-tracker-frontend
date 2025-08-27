@@ -31,6 +31,12 @@ function loadDashboard() {
   fetchSavings();
   setupSavingsListeners();
   getSavingsHistory();
+  getIncome();
+  // 🔥 AI features
+  getSavingsChallenge();
+  getExpensePrediction();
+  getRecommendations();
+  getAutoBudget();
 }
 
 // ========== UTILITY ==========
@@ -129,6 +135,85 @@ async function signup() {
 function logout() {
   localStorage.clear();
   window.location.href = "index.html";
+}
+
+
+// ========== INCOME ==========
+
+// Save Income
+async function setIncome() {
+  const income = {
+    userId: localStorage.getItem("userId"),
+    amount: document.getElementById("incomeAmount").value,
+    month: document.getElementById("incomeMonth").value,
+  };
+
+  try {
+    const res = await fetch(`${backendURL}/api/income/`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(income),
+    });
+
+    const data = await res.json();
+    if (res.ok) {
+      showMessage("Income set successfully");
+      clearInputs(["incomeAmount", "incomeMonth"]);
+      getIncome();
+    } else {
+      showMessage(data.message || "Error setting income", true);
+    }
+  } catch {
+    showMessage("Error setting income", true);
+  }
+}
+
+// Get Income
+async function getIncome() {
+  const userId = localStorage.getItem("userId");
+  const list = document.getElementById("incomeList");
+  if (!list) return;
+
+  try {
+    const res = await fetch(`${backendURL}/api/income/${userId}`);
+    const incomes = await res.json();
+    list.innerHTML = "";
+
+    // Sort by month descending (latest first)
+    incomes.sort((a, b) => b.month.localeCompare(a.month));
+
+    incomes.forEach((income) => {
+      const item = document.createElement("div");
+      item.innerHTML = `
+        ${income.month} - ₹${income.amount}
+        <button onclick="deleteIncome('${income._id}')">Delete</button>
+      `;
+      list.appendChild(item);
+    });
+  } catch {
+    showMessage("Error fetching incomes", true);
+  }
+}
+
+// Delete Income
+async function deleteIncome(id) {
+  if (confirm("Are you sure you want to delete this income?")) {
+    try {
+      const res = await fetch(`${backendURL}/api/income/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        showMessage("Income deleted");
+        getIncome();
+      } else {
+        showMessage(data.message || "Error deleting income", true);
+      }
+    } catch {
+      showMessage("Error deleting income", true);
+    }
+  }
 }
 
 // ========== SAVINGS ==========
@@ -564,3 +649,94 @@ async function getRemainingByCategory() {
     console.error("Error in category budget tracker:", err);
   }
 }
+
+// ========== AI INTEGRATION ==========
+
+// Get Savings Challenge (Flask AI)
+async function getSavingsChallenge() {
+  const userId = localStorage.getItem("userId");
+  const display = document.getElementById("savingsChallenge");
+  if (!display) return;
+
+  try {
+    const res = await fetch(`${backendURL}/api/ai/challenges/${userId}`);
+    const data = await res.json();
+
+    if (res.ok) {
+      display.textContent = data.challenge || "No challenge available";
+    } else {
+      display.textContent = "Error loading savings challenge";
+    }
+  } catch (err) {
+    console.error("Error fetching savings challenge:", err);
+    display.textContent = "Error loading savings challenge";
+  }
+}
+
+// Get Expense Prediction (next month)
+async function getExpensePrediction() {
+  const userId = localStorage.getItem("userId");
+  const display = document.getElementById("expensePrediction");
+  if (!display) return;
+
+  try {
+    const res = await fetch(`${backendURL}/api/ai/predict/${userId}`);
+    const data = await res.json();
+
+    if (res.ok) {
+      display.textContent = `Next Month Prediction: ₹${data.prediction.toFixed(2)}`;
+    } else {
+      display.textContent = "Error predicting expenses";
+    }
+  } catch (err) {
+    console.error("Error predicting expenses:", err);
+    display.textContent = "Error predicting expenses";
+  }
+}
+
+// Get Recommendations
+async function getRecommendations() {
+  const userId = localStorage.getItem("userId");
+  const display = document.getElementById("recommendations");
+  if (!display) return;
+
+  try {
+    const res = await fetch(`${backendURL}/api/ai/recommend/${userId}`);
+    const data = await res.json();
+
+    if (res.ok) {
+      display.innerHTML = data.tips.map(t => `<li>${t}</li>`).join("");
+    } else {
+      display.textContent = "Error fetching recommendations";
+    }
+  } catch (err) {
+    console.error("Error fetching recommendations:", err);
+    display.textContent = "Error fetching recommendations";
+  }
+}
+
+// Get Auto Budget
+async function getAutoBudget() {
+  const userId = localStorage.getItem("userId");
+  const display = document.getElementById("autoBudget");
+  if (!display) return;
+
+  try {
+    const res = await fetch(`${backendURL}/api/ai/autobudget/${userId}`);
+    const data = await res.json();
+
+    if (res.ok && Array.isArray(data.plan)) {
+      display.innerHTML = data.plan
+        .map(p => `<div>Cluster ${p.cluster}: ₹${p.amount}</div>`)
+        .join("");
+    } else {
+      display.textContent = "Error generating auto-budget";
+    }
+  } catch (err) {
+    console.error("Error fetching auto-budget:", err);
+    display.textContent = "Error generating auto-budget";
+  }
+}
+
+
+

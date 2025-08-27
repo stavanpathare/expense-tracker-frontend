@@ -23,13 +23,32 @@
     <div class="navbar">
       <div class="nav-links">
         <a href="dashboard.html">Home</a>
-        <a href="graph.html">Graph</a>
+        <a href="graph.html">Graph</a> 
+        <a href="ai.html">AI Features</a>
       </div>
     </div>
     <h1>Welcome back 👋</h1>
 
     <!-- ===== Main Container ===== -->
     <div class="container">
+
+      <!-- ===== Set Income ===== -->
+<div class="card">
+  <h2>Add Income</h2>
+  <input type="number" id="incomeAmount" placeholder="Income ₹" />
+  <input type="month" id="incomeMonth" />
+  <button onclick="setIncome()">Save Income</button>
+</div>
+
+<!-- ===== Income Display ===== -->
+<div class="card">
+  <h2>Monthly Income</h2>
+  <div id="incomeList"></div> 
+</div>
+
+
+
+
       <!-- ===== Add Expense ===== -->
       <div class="card">
         <h2>Add Expense</h2>
@@ -81,8 +100,7 @@
             Save Savings
           </button>
 
-          <!-- Optional: live previous entry for selected month -->
-          <!-- <div id="savingsHistory" style="margin-top: 10px;"></div> -->
+  
         </div>
       </div>
 
