@@ -8,7 +8,19 @@ window.addEventListener("pageshow", () => {
     if (!localStorage.getItem("token")) {
       window.location.href = "index.html";
     } else {
-      loadDashboard(); // Always load dashboard data
+      loadDashboard();
+    }
+  }
+
+  if (page.includes("ai.html")) {
+    if (!localStorage.getItem("token")) {
+      window.location.href = "index.html";
+    } else {
+      // Load AI features
+      loadPrediction();
+      loadRecommendations();
+      loadAutoBudget();
+      loadSavingsChallenge();
     }
   }
 
@@ -22,6 +34,7 @@ window.addEventListener("pageshow", () => {
   }
 });
 
+
 // ========== DASHBOARD LOADER ==========
 function loadDashboard() {
   getExpenses();
@@ -32,11 +45,11 @@ function loadDashboard() {
   setupSavingsListeners();
   getSavingsHistory();
   getIncome();
-  // 🔥 AI features
-  getSavingsChallenge();
-  getExpensePrediction();
-  getRecommendations();
-  getAutoBudget();
+  loadAutoBudget();
+  loadPrediction();
+  loadRecommendations();
+  loadSavingsChallenge();
+
 }
 
 // ========== UTILITY ==========
@@ -650,93 +663,87 @@ async function getRemainingByCategory() {
   }
 }
 
-// ========== AI INTEGRATION ==========
-
-// Get Savings Challenge (Flask AI)
-async function getSavingsChallenge() {
+// ---------- 1. Expense Prediction ----------
+async function loadPrediction() {
   const userId = localStorage.getItem("userId");
-  const display = document.getElementById("savingsChallenge");
-  if (!display) return;
-
-  try {
-    const res = await fetch(`${backendURL}/api/ai/challenges/${userId}`);
-    const data = await res.json();
-
-    if (res.ok) {
-      display.textContent = data.challenge || "No challenge available";
-    } else {
-      display.textContent = "Error loading savings challenge";
-    }
-  } catch (err) {
-    console.error("Error fetching savings challenge:", err);
-    display.textContent = "Error loading savings challenge";
-  }
-}
-
-// Get Expense Prediction (next month)
-async function getExpensePrediction() {
-  const userId = localStorage.getItem("userId");
-  const display = document.getElementById("expensePrediction");
-  if (!display) return;
-
   try {
     const res = await fetch(`${backendURL}/api/ai/predict/${userId}`);
     const data = await res.json();
-
-    if (res.ok) {
-      display.textContent = `Next Month Prediction: ₹${data.prediction.toFixed(2)}`;
-    } else {
-      display.textContent = "Error predicting expenses";
-    }
+    document.getElementById("expensePrediction").innerText =
+      `Next month’s expense prediction: ₹${data.prediction.toFixed(2)}`;
   } catch (err) {
-    console.error("Error predicting expenses:", err);
-    display.textContent = "Error predicting expenses";
+    document.getElementById("expensePrediction").innerText =
+      "⚠️ Error fetching prediction.";
   }
 }
 
-// Get Recommendations
-async function getRecommendations() {
+// ---------- 2. Recommendations ----------
+async function loadRecommendations() {
   const userId = localStorage.getItem("userId");
-  const display = document.getElementById("recommendations");
-  if (!display) return;
-
   try {
     const res = await fetch(`${backendURL}/api/ai/recommend/${userId}`);
     const data = await res.json();
-
-    if (res.ok) {
-      display.innerHTML = data.tips.map(t => `<li>${t}</li>`).join("");
-    } else {
-      display.textContent = "Error fetching recommendations";
-    }
+    const list = document.getElementById("recommendations");
+    list.innerHTML = "";
+    data.tips.forEach(tip => {
+      const li = document.createElement("li");
+      li.innerText = tip;
+      list.appendChild(li);
+    });
   } catch (err) {
-    console.error("Error fetching recommendations:", err);
-    display.textContent = "Error fetching recommendations";
+    document.getElementById("recommendations").innerText =
+      "⚠️ Error fetching recommendations.";
   }
 }
 
-// Get Auto Budget
-async function getAutoBudget() {
+// ---------- 3. Auto-Budget (Improved UI) ----------
+async function loadAutoBudget() {
   const userId = localStorage.getItem("userId");
-  const display = document.getElementById("autoBudget");
-  if (!display) return;
-
   try {
     const res = await fetch(`${backendURL}/api/ai/autobudget/${userId}`);
     const data = await res.json();
 
-    if (res.ok && Array.isArray(data.plan)) {
-      display.innerHTML = data.plan
-        .map(p => `<div>Cluster ${p.cluster}: ₹${p.amount}</div>`)
-        .join("");
-    } else {
-      display.textContent = "Error generating auto-budget";
-    }
+    const container = document.getElementById("autoBudget");
+    container.innerHTML = "";
+
+    // Custom labels for clarity
+    const labels = ["Needs", "Wants", "Savings"];
+
+    // Calculate total for percentage split
+    const total = data.plan.reduce((sum, item) => sum + item.amount, 0);
+
+    data.plan.forEach((item, i) => {
+      const percent = ((item.amount / total) * 100).toFixed(1);
+
+      const div = document.createElement("div");
+      div.innerHTML = `
+        <strong>${labels[i] || "Category " + i}</strong>: 
+        ₹${item.amount.toFixed(2)} 
+        <span style="color: gray;">(${percent}%)</span>
+        <div style="background:#ddd; border-radius:8px; overflow:hidden; height:10px; margin-top:5px;">
+          <div style="width:${percent}%; background:#4CAF50; height:100%;"></div>
+        </div>
+      `;
+      div.style.marginBottom = "15px";
+      container.appendChild(div);
+    });
+
   } catch (err) {
-    console.error("Error fetching auto-budget:", err);
-    display.textContent = "Error generating auto-budget";
+    document.getElementById("autoBudget").innerText =
+      "⚠️ Error fetching auto-budget.";
   }
 }
 
 
-
+// ---------- 4. Savings Challenge ----------
+async function loadSavingsChallenge() {
+  const userId = localStorage.getItem("userId");
+  try {
+    const res = await fetch(`${backendURL}/api/ai/challenges/${userId}`);
+    const data = await res.json();
+    document.getElementById("savingsChallenge").innerText = data.challenge;
+  } catch (err) {
+    document.getElementById("savingsChallenge").innerText =
+      "⚠️ Error fetching savings challenge.";
+  }
+}
