@@ -663,17 +663,26 @@ async function getRemainingByCategory() {
   }
 }
 
+// ========== AI INTEGRATION ==========
+
 // ---------- 1. Expense Prediction ----------
 async function loadPrediction() {
   const userId = localStorage.getItem("userId");
   try {
     const res = await fetch(`${backendURL}/api/ai/predict/${userId}`);
     const data = await res.json();
-    document.getElementById("expensePrediction").innerText =
-      `Next month’s expense prediction: ₹${data.prediction.toFixed(2)}`;
+
+    document.getElementById("expensePrediction").innerHTML = `
+      <strong>Prediction:</strong> ₹${data.prediction.toFixed(2)} 
+      (${data.trend}, conf ${Math.round(data.confidence * 100)}%)<br/>
+      <strong>Persona:</strong> ${data.persona}<br/>
+      <strong>Top Categories:</strong> ${data.top_categories.map(c => `${c.category}: ₹${c.amount}`).join(", ")}<br/>
+      💡 ${data.ai_text}
+    `;
   } catch (err) {
+    console.error("Prediction error:", err);
     document.getElementById("expensePrediction").innerText =
-      "⚠️ Error fetching prediction.";
+      "⚠️ Could not load prediction";
   }
 }
 
@@ -681,69 +690,62 @@ async function loadPrediction() {
 async function loadRecommendations() {
   const userId = localStorage.getItem("userId");
   try {
-    const res = await fetch(`${backendURL}/api/ai/recommend/${userId}`);
-    const data = await res.json();
-    const list = document.getElementById("recommendations");
-    list.innerHTML = "";
-    data.tips.forEach(tip => {
-      const li = document.createElement("li");
-      li.innerText = tip;
-      list.appendChild(li);
-    });
+    const r = await fetch(`${backendURL}/api/ai/recommend/${userId}`);
+    const rd = await r.json();
+
+    document.getElementById("recommendations").innerHTML = `
+      <strong>Status:</strong> ${rd.status} 
+      (Ratio: ${(rd.ratio * 100).toFixed(1)}%)<br/>
+      <strong>Persona:</strong> ${rd.persona}<br/>
+      <ul>${rd.tips.map(t => `<li>${t}</li>`).join("")}</ul>
+    `;
   } catch (err) {
+    console.error("Recommendations error:", err);
     document.getElementById("recommendations").innerText =
-      "⚠️ Error fetching recommendations.";
+      "⚠️ Could not load recommendations";
   }
 }
 
-// ---------- 3. Auto-Budget (Improved UI) ----------
+// ---------- 3. Auto-budget ----------
 async function loadAutoBudget() {
   const userId = localStorage.getItem("userId");
   try {
-    const res = await fetch(`${backendURL}/api/ai/autobudget/${userId}`);
-    const data = await res.json();
+    const a = await fetch(`${backendURL}/api/ai/autobudget/${userId}`);
+    const ad = await a.json();
 
-    const container = document.getElementById("autoBudget");
-    container.innerHTML = "";
-
-    // Custom labels for clarity
-    const labels = ["Needs", "Wants", "Savings"];
-
-    // Calculate total for percentage split
-    const total = data.plan.reduce((sum, item) => sum + item.amount, 0);
-
-    data.plan.forEach((item, i) => {
-      const percent = ((item.amount / total) * 100).toFixed(1);
-
-      const div = document.createElement("div");
-      div.innerHTML = `
-        <strong>${labels[i] || "Category " + i}</strong>: 
-        ₹${item.amount.toFixed(2)} 
-        <span style="color: gray;">(${percent}%)</span>
-        <div style="background:#ddd; border-radius:8px; overflow:hidden; height:10px; margin-top:5px;">
-          <div style="width:${percent}%; background:#4CAF50; height:100%;"></div>
-        </div>
-      `;
-      div.style.marginBottom = "15px";
-      container.appendChild(div);
-    });
-
+    document.getElementById("autoBudget").innerHTML = `
+      <strong>Persona:</strong> ${ad.persona}<br/>
+      <div><strong>Category-wise Plan:</strong></div>
+      ${Object.entries(ad.per_category)
+        .map(([cat, amt]) => `<div>${cat}: ₹${amt}</div>`)
+        .join("")}
+      <p>💡 ${ad.ai_text}</p>
+    `;
   } catch (err) {
+    console.error("AutoBudget error:", err);
     document.getElementById("autoBudget").innerText =
-      "⚠️ Error fetching auto-budget.";
+      "⚠️ Could not load auto-budget";
   }
 }
-
 
 // ---------- 4. Savings Challenge ----------
 async function loadSavingsChallenge() {
   const userId = localStorage.getItem("userId");
   try {
-    const res = await fetch(`${backendURL}/api/ai/challenges/${userId}`);
-    const data = await res.json();
-    document.getElementById("savingsChallenge").innerText = data.challenge;
+    const c = await fetch(`${backendURL}/api/ai/challenges/${userId}`);
+    const cd = await c.json();
+
+    document.getElementById("savingsChallenge").innerHTML = `
+      <strong>Challenge:</strong> ${cd.challenge}<br/>
+      <strong>Target:</strong> ₹${cd.next_goal}<br/>
+      <strong>Type:</strong> ${cd.type}<br/>
+      💬 ${cd.motivation}<br/>
+      <div><strong>Micro-challenges:</strong></div>
+      <ul>${cd.micro_challenges.map(m => `<li>${m}</li>`).join("")}</ul>
+    `;
   } catch (err) {
+    console.error("Challenges error:", err);
     document.getElementById("savingsChallenge").innerText =
-      "⚠️ Error fetching savings challenge.";
+      "⚠️ Could not load savings challenge";
   }
 }
