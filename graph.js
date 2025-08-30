@@ -188,12 +188,12 @@ async function drawSavingsVsBudgetChart() {
           {
             label: "Budget",
             data: budgetValues,
-            backgroundColor: "rgba(54, 162, 235, 0.6)",
+            backgroundColor: "#3b82f6",
           },
           {
             label: "Savings",
             data: savingsValues,
-            backgroundColor: "rgba(75, 192, 192, 0.6)",
+            backgroundColor: "#10b981",
           },
         ],
       },
@@ -272,8 +272,8 @@ async function drawMonthlyExpensesLineChart() {
             label: "Total Expenses",
             data: values,
             fill: false,
-            borderColor: "#f87171", // soft red
-            backgroundColor: "#f87171",
+            borderColor: "#f59e0b", // soft red
+            backgroundColor: "#f59e0b",
             tension: 0.3,
           },
         ],
@@ -344,7 +344,7 @@ async function drawExpensesByCategoryBarChart() {
           {
             label: "₹ Spent",
             data,
-            backgroundColor: "#FFA500",
+            backgroundColor: "#ef4444",
             borderRadius: 5,
           },
         ],
