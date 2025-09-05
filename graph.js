@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // drawBudgetCategoryPieChart();
   drawSavingsVsBudgetChart();
   drawMonthlyExpensesLineChart();
-  drawExpensesByCategoryBarChart();
+  drawExpensesByCategoryPieChart();
   drawBudgetCategoryDonutChart();
 });
 
@@ -309,8 +309,8 @@ async function drawMonthlyExpensesLineChart() {
   }
 }
 
-// Expenses Pie CHart
-async function drawExpensesByCategoryBarChart() {
+// Expenses Pie Chart
+async function drawExpensesByCategoryPieChart() {
   const userId = localStorage.getItem("userId");
   const currentMonth = new Date().toISOString().slice(0, 7);
 
@@ -318,6 +318,7 @@ async function drawExpensesByCategoryBarChart() {
     const res = await fetch(`${backendURL}/api/expenses/${userId}`);
     const expenses = await res.json();
 
+    // Filter current month
     const monthlyExpenses = expenses.filter((exp) =>
       exp.date.startsWith(currentMonth)
     );
@@ -337,51 +338,48 @@ async function drawExpensesByCategoryBarChart() {
       .getContext("2d");
 
     new Chart(ctx, {
-      type: "bar",
+      type: "pie",
       data: {
         labels,
         datasets: [
           {
             label: "₹ Spent",
             data,
-            backgroundColor: "#ef4444",
-            borderRadius: 5,
+            backgroundColor: [
+              "#ef4444", // red
+              "#3b82f6", // blue
+              "#22c55e", // green
+              "#eab308", // yellow
+              "#a855f7", // purple
+              "#f97316", // orange
+              "#14b8a6", // teal
+            ],
+            borderColor: "#fff",
+            borderWidth: 1,
           },
         ],
       },
       options: {
-        indexAxis: "y", // Horizontal bar
         responsive: true,
         plugins: {
           legend: {
-            display: false,
+            position: "bottom",
+            labels: {
+              color: "#fff",
+              font: { size: 14 },
+            },
           },
           title: {
-            display: false,
-          },
-        },
-        scales: {
-          x: {
-            ticks: {
-              color: "#fff",
-            },
-            grid: {
-              color: "rgba(255, 255, 255, 0.1)",
-            },
-          },
-          y: {
-            ticks: {
-              color: "#fff",
-            },
-            grid: {
-              display: false,
-            },
+            display: true,
+            text: "Expenses by Category (Pie Chart)",
+            color: "#38bdf8",
+            font: { size: 18 },
           },
         },
       },
     });
   } catch (err) {
-    console.error("Expenses by Category Chart Error:", err);
+    console.error("Expenses by Category Pie Chart Error:", err);
   }
 }
 
