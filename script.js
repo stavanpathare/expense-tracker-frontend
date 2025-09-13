@@ -49,7 +49,7 @@ function loadDashboard() {
   loadPrediction();
   loadRecommendations();
   loadSavingsChallenge();
-
+  loadQuote(); 
 }
 
 // ========== UTILITY ==========
@@ -749,3 +749,20 @@ async function loadSavingsChallenge() {
       "⚠️ Could not load savings challenge";
   }
 }
+
+// ---------- 5. Daily Quote ----------
+async function loadQuote() {
+  const userId = localStorage.getItem("userId");
+
+  try {
+    const res = await fetch(`${backendURL}/api/quote/${userId}`);
+    const { quote } = await res.json();
+
+    document.getElementById("moneyQuote").innerText = `💡 "${quote}"`;
+  } catch (err) {
+    console.error("Quote fetch error:", err);
+    document.getElementById("moneyQuote").innerText =
+      "💡 Stay mindful with your money.";
+  }
+}
+document.addEventListener("DOMContentLoaded", loadQuote);
